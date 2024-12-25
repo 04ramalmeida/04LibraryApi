@@ -1,0 +1,6 @@
+@_04LibraryApi_HostAddress = http://localhost:5031
+
+GET {{_04LibraryApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
