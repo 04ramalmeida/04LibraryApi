@@ -1,8 +1,14 @@
+using System.Text;
 using _04LibraryApi.Data;
+using _04LibraryApi.Data.Entities;
+using _04LibraryApi.Helpers;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
-var Configuration = builder.Configuration;
+var configuration = builder.Configuration;
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -12,10 +18,41 @@ builder.Services.AddOpenApi();
 // Set the SQL Server instance to use
 builder.Services.AddDbContext<DataContext>(options =>
 {
-    options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));  
+    options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));  
 });
 
+//Setup identity
+builder.Services.AddIdentity<User, IdentityRole>(options =>
+{
+    options.Tokens.AuthenticatorTokenProvider = TokenOptions.DefaultAuthenticatorProvider;
+    options.SignIn.RequireConfirmedEmail = true;
+    options.User.RequireUniqueEmail = true;
+    options.Password.RequiredLength = 7;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireLowercase = false;
+})
+.AddDefaultTokenProviders()
+.AddEntityFrameworkStores<DataContext>();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidAudience = configuration["JWT:Audience"],
+            ValidIssuer = configuration["JWT:Issuer"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"]!))
+        };
+    });
+
+builder.Services.AddTransient<IUserHelper, UserHelper>();
 builder.Services.AddTransient<DataSeed>();
+
 
 var app = builder.Build();
 
@@ -27,6 +64,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 

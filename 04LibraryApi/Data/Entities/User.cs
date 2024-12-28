@@ -1,16 +1,16 @@
-﻿namespace _04LibraryApi.Data.Entities;
+﻿using Microsoft.AspNetCore.Identity;
 
-public class User : IEntity
+namespace _04LibraryApi.Data.Entities;
+
+public class User : IdentityUser
 {
-    public int Id { get; set; }
-    
     public string FirstName { get; set; }
     
     public string LastName { get; set; }
     
     public DateTime CreatedOn { get; set; }
     
-    public string ImageUrl { get; set; }
+    public string? ImageUrl { get; set; }
     
     public ICollection<Book> Library { get; set; }    
 }
