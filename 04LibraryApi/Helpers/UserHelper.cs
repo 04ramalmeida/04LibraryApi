@@ -9,14 +9,17 @@ public class UserHelper : IUserHelper
     private readonly DataContext _context;
     private readonly UserManager<User> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
+    private readonly SignInManager<User> _signInManager;
 
     public UserHelper(DataContext context,
         UserManager<User> userManager,
-        RoleManager<IdentityRole> roleManager)
+        RoleManager<IdentityRole> roleManager,
+        SignInManager<User> signInManager)
     {
         _context = context;
         _userManager = userManager;
         _roleManager = roleManager;
+        _signInManager = signInManager;
     }
     public async Task CheckRoleAsync(string roleName)
     {
@@ -57,4 +60,10 @@ public class UserHelper : IUserHelper
     {
         await _userManager.ConfirmEmailAsync(user, token);
     }
+
+    public async Task<SignInResult> LoginAsync(User user, string password)
+    {
+        return await _signInManager.PasswordSignInAsync(user, password, false, false);
+    }
+    
 }

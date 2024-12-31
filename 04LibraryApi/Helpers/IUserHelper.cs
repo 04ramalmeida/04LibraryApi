@@ -18,4 +18,6 @@ public interface IUserHelper
     Task<string> GenerateEmailConfirmationTokenAsync(User user);
     
     Task ConfirmEmailAsync(User user, string token);
+    
+   Task<SignInResult> LoginAsync(User user, string password); 
 }
