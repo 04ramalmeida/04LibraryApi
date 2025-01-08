@@ -16,7 +16,8 @@ namespace _04LibraryApi.Controllers
     [ApiController]
     public class AccountController(IUserHelper userHelper,
         IConfiguration config,
-        IMailHelper mailHelper) : ControllerBase
+        IMailHelper mailHelper,
+        IBlobHelper blobHelper) : ControllerBase
     {
         
         
@@ -79,7 +80,8 @@ namespace _04LibraryApi.Controllers
                 FirstName = firstname,
                 LastName = lastname,
                 CreatedOn = DateTime.Now,
-                Library = new List<Book>()
+                Library = new List<Book>(),
+                ImageId = Guid.Empty
             };
             var result = await userHelper.CreateUserAsync(user, password);
             if (result != IdentityResult.Success)
@@ -164,6 +166,47 @@ namespace _04LibraryApi.Controllers
                 var username = identity.FindFirst(ClaimTypes.Email).Value;
                 var userInfo = await userHelper.GetUserInfoAsync(username);
                 return Ok(userInfo);
+            }
+
+            return Unauthorized();
+        }
+
+        [Authorize]
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetUserPic()
+        {
+            if (HttpContext.User.Identity is ClaimsIdentity identity)
+            {
+                var username = identity.FindFirst(ClaimTypes.Email).Value;
+                var user = await userHelper.GetUserAsync(username);
+                return Ok(user.ImagePath);
+            }
+            return Unauthorized();  
+        }
+        
+        [Authorize]
+        [HttpPost("[action]")]
+        public async Task<IActionResult> UploadPic(IFormFile file)
+        {
+            if (HttpContext.User.Identity is ClaimsIdentity identity)
+            {
+                var username = identity.FindFirst(ClaimTypes.Email).Value;
+                var user = await userHelper.GetUserAsync(username);
+                try
+                {
+                    Guid imageId = await blobHelper.UploadBlobAsync(file);
+                    user.ImageId = imageId;
+                    var response = await userHelper.ChangeUserAsync(user);
+                    if (response.Succeeded)
+                    {
+                        return Ok("The new picture has been set.");
+                    }
+                    return BadRequest(response.Errors.FirstOrDefault().Description);
+                }
+                catch (Exception e)
+                {
+                    return BadRequest(e.Message);
+                }
             }
             return Unauthorized();
         }

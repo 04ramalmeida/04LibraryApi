@@ -27,4 +27,6 @@ public interface IUserHelper
    Task<string> GeneratePasswordResetTokenAsync(User user);
 
    Task<IdentityResult> ResetPasswordAsync(User user, string token, string newPassword);
+
+   Task<IdentityResult> ChangeUserAsync(User user);
 }

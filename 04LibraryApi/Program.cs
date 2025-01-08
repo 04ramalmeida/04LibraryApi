@@ -71,7 +71,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
-app.UseAuthorization();
+app.UseAuthorization(); // TODO: Make it so it returns 401 when the user isn't authorized
 
 
 
