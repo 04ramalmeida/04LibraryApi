@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using System.Collections;
+using Microsoft.AspNetCore.Identity;
 
 namespace _04LibraryApi.Data.Entities;
 
@@ -12,5 +13,5 @@ public class User : IdentityUser
     
     public string? ImageUrl { get; set; }
     
-    public ICollection<Book> Library { get; set; }    
+    public ICollection<Book> Library { get; set; } 
 }

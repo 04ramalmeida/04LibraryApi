@@ -1,11 +1,12 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using _04LibraryApi.Data;
 using _04LibraryApi.Data.Entities;
+using _04LibraryApi.Data.Models;
 using _04LibraryApi.Helpers;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 
@@ -14,15 +15,20 @@ namespace _04LibraryApi.Controllers
     [Route("api/[controller]")]
     [ApiController]
     public class AccountController(IUserHelper userHelper,
-        IConfiguration config) : ControllerBase
+        IConfiguration config,
+        IMailHelper mailHelper) : ControllerBase
     {
+        
+        
+        
+        
         [HttpPost("[action]")]
         public async Task<IActionResult> Login(string username, string password)
         {
             var user = await userHelper.GetUserAsync(username);
             if (user == null)
             {
-                return NotFound("This user does not exist.");
+                return BadRequest("Wrong username or password.");
             }
             var loginResult = await userHelper.LoginAsync(user, password);
             if (loginResult.Succeeded)
@@ -56,29 +62,110 @@ namespace _04LibraryApi.Controllers
                     user.UserName
                 });
             }
-            else
-            {
-                return BadRequest("Wrong username or password.");
-            }
+
+            return BadRequest("Wrong username or password.");
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost("[action]")]
+        public async Task<IActionResult> Register(string username,
+            string password,
+            string firstname,
+            string lastname)
+        {
+            User user = new User
+            {
+                UserName = username,
+                Email = username,
+                FirstName = firstname,
+                LastName = lastname,
+                CreatedOn = DateTime.Now,
+                Library = new List<Book>()
+            };
+            var result = await userHelper.CreateUserAsync(user, password);
+            if (result != IdentityResult.Success)
+            {
+                return BadRequest(result.Errors.FirstOrDefault().Description);
+                
+            }
+
+            string userToken = await userHelper.GenerateEmailConfirmationTokenAsync(user);
+            Response response = mailHelper.SendEmail(username, "Email Confirmation",
+                "To finish your registration, please enter the token \n " +
+                $"{userToken}");
+
+            if (response.IsSuccess)
+            {
+                return Ok("The user has been created.");
+            }
+            return BadRequest(response.Message);
+        }
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> ConfirmEmail([FromBody]EmailConfirmation confirmationInfo)
+        {
+            var user = await userHelper.GetUserAsync(confirmationInfo.Username);
+            if (user == null)
+            {
+                return NotFound("Wrong username or token.");
+            }
+            var result = await userHelper.ConfirmEmailAsync(user, confirmationInfo.Token);
+            if (result.Succeeded)
+            {
+                return Ok("Email confirmed.");
+            }
+            return BadRequest(result.Errors.FirstOrDefault().Description);
+        }
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> ForgotPassword(string email)
+        {
+            var user = await userHelper.GetUserAsync(email);
+            if (user == null)
+            {
+               return NotFound("No user found."); 
+            }
+            string token = await userHelper.GeneratePasswordResetTokenAsync(user);
+            Response response = mailHelper.SendEmail(email, "Password Recovery",
+                "To reset your password, enter this token on the app:\n " +
+                $"{token}");
+
+            if (response.IsSuccess)
+            {
+                return Ok("Check your email for further instructions.");
+            }
+            return BadRequest(response.Message);
+        }
+
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> ResetPassword([FromBody]PasswordReset resetInfo)
+        {
+            var user = await userHelper.GetUserAsync(resetInfo.Email);
+            if (user == null)
+            {
+                return BadRequest("Wrong email or token.");
+            }
+            
+            var result = await userHelper.ResetPasswordAsync(user, resetInfo.Token, resetInfo.Password);
+
+            if (result.Succeeded)
+            {
+                return Ok("Password reset successful.");
+            }
+            return BadRequest(result.Errors.FirstOrDefault().Description);
+        }
+        
+        [Authorize]
         [HttpGet("[action]")]
         public async Task<IActionResult> GetUserInfo()
         {
-            var username = string.Empty;
             if (HttpContext.User.Identity is ClaimsIdentity identity)
             {
-                username = identity.FindFirst(ClaimTypes.Email).Value;
+                var username = identity.FindFirst(ClaimTypes.Email).Value;
+                var userInfo = await userHelper.GetUserInfoAsync(username);
+                return Ok(userInfo);
             }
-            if (username == null)
-            {
-                return Ok("nope");
-            }
-            else
-            {
-                return Ok(username);
-            }
+            return Unauthorized();
         }
     }
 }

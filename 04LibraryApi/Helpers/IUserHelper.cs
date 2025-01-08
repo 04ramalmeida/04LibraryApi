@@ -1,4 +1,5 @@
 ﻿using _04LibraryApi.Data.Entities;
+using _04LibraryApi.Data.Models;
 using Microsoft.AspNetCore.Identity;
 
 namespace _04LibraryApi.Helpers;
@@ -17,7 +18,13 @@ public interface IUserHelper
     
     Task<string> GenerateEmailConfirmationTokenAsync(User user);
     
-    Task ConfirmEmailAsync(User user, string token);
+    Task<IdentityResult> ConfirmEmailAsync(User user, string token);
     
-   Task<SignInResult> LoginAsync(User user, string password); 
+   Task<SignInResult> LoginAsync(User user, string password);
+
+   Task<UserInfo> GetUserInfoAsync(string userName);
+
+   Task<string> GeneratePasswordResetTokenAsync(User user);
+
+   Task<IdentityResult> ResetPasswordAsync(User user, string token, string newPassword);
 }

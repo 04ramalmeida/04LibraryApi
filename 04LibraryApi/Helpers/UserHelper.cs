@@ -1,5 +1,6 @@
 ﻿using _04LibraryApi.Data;
 using _04LibraryApi.Data.Entities;
+using _04LibraryApi.Data.Models;
 using Microsoft.AspNetCore.Identity;
 
 namespace _04LibraryApi.Helpers;
@@ -56,14 +57,43 @@ public class UserHelper : IUserHelper
         return await _userManager.GenerateEmailConfirmationTokenAsync(user);
     }
 
-    public async Task ConfirmEmailAsync(User user, string token)
+    public async Task<IdentityResult> ConfirmEmailAsync(User user, string token)
     {
-        await _userManager.ConfirmEmailAsync(user, token);
+        return await _userManager.ConfirmEmailAsync(user, token);
     }
 
     public async Task<SignInResult> LoginAsync(User user, string password)
     {
         return await _signInManager.PasswordSignInAsync(user, password, false, false);
     }
-    
+
+    public async Task<UserInfo> GetUserInfoAsync(string userName)
+    {
+        var user = await GetUserAsync(userName);
+        var userInfo = new UserInfo
+        {
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Email = user.Email,
+            CreatedOn = user.CreatedOn
+        };
+        return userInfo;
+    }
+
+
+    public async Task<IdentityResult> RegisterUserAsync(User user, string password)
+    {
+        var result = await _userManager.CreateAsync(user, password);
+        return result;
+    }
+
+    public async Task<string> GeneratePasswordResetTokenAsync(User user)
+    {
+        return await _userManager.GeneratePasswordResetTokenAsync(user);
+    }
+
+    public async Task<IdentityResult> ResetPasswordAsync(User user, string token, string newPassword)
+    {
+        return await _userManager.ResetPasswordAsync(user, token, newPassword);
+    }
 }
