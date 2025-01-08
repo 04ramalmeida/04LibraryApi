@@ -38,6 +38,7 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
 builder.Services.AddAuthentication( options =>
     {
         options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     })
     .AddJwtBearer(options =>
@@ -45,6 +46,7 @@ builder.Services.AddAuthentication( options =>
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
+            
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
@@ -71,7 +73,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
-app.UseAuthorization(); // TODO: Make it so it returns 401 when the user isn't authorized
+app.UseAuthorization();
 
 
 
