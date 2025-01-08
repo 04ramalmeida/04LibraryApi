@@ -56,6 +56,7 @@ builder.Services.AddAuthentication( options =>
 
 builder.Services.AddTransient<IUserHelper, UserHelper>();
 builder.Services.AddTransient<IMailHelper, MailHelper>();
+builder.Services.AddTransient<IBlobHelper, BlobHelper>();
 builder.Services.AddTransient<DataSeed>();
 
 
