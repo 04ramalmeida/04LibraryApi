@@ -11,7 +11,11 @@ public class User : IdentityUser
     
     public DateTime CreatedOn { get; set; }
     
-    public string? ImageUrl { get; set; }
+    public Guid? ImageId { get; set; }
+
+    public string? ImagePath => ImageId == Guid.Empty
+        ? "https://jalmaquablob.blob.core.windows.net/library-avatars/default.png"
+        : $"https://jalmaquablob.blob.core.windows.net/library-avatars/{ImageId}";
     
     public ICollection<Book> Library { get; set; } 
 }

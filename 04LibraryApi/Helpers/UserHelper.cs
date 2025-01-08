@@ -96,4 +96,5 @@ public class UserHelper : IUserHelper
     {
         return await _userManager.ResetPasswordAsync(user, token, newPassword);
     }
+    
 }

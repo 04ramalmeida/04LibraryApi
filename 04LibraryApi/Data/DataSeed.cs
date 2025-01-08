@@ -45,7 +45,8 @@ public class DataSeed
                 Email = "masterlibrarian@library.com",
                 UserName = "masterlibrarian@library.com",
                 PhoneNumber = "123456789",
-                CreatedOn = DateTime.Now
+                CreatedOn = DateTime.Now,
+                ImageId = Guid.Empty
             };
 
             var result = await _userHelper.CreateUserAsync(user, "1234567");
@@ -81,7 +82,8 @@ public class DataSeed
                 Email = "admin@library.com",
                 UserName = "admin@library.com",
                 PhoneNumber = "123456789",
-                CreatedOn = DateTime.Now
+                CreatedOn = DateTime.Now,
+                ImageId = Guid.Empty
             };
 
             var result = await _userHelper.CreateUserAsync(user, "1234567");
