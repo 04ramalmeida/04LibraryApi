@@ -101,4 +101,9 @@ public class UserHelper : IUserHelper
     {
         return await _userManager.UpdateAsync(user);
     }
+
+    public async Task<IdentityResult> ChangePasswordAsync(User user, string currentPassword, string newPassword)
+    {
+        return await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+    }
 }

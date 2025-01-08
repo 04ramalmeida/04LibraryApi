@@ -210,5 +210,43 @@ namespace _04LibraryApi.Controllers
             }
             return Unauthorized();
         }
+
+        [Authorize]
+        [HttpPost("[action]")]
+        public async Task<IActionResult> ChangeUserInfo([FromBody] UserInfo userInfo)
+        {
+            if (HttpContext.User.Identity is ClaimsIdentity identity)
+            {
+                var username = identity.FindFirst(ClaimTypes.Email).Value;
+                var user = await userHelper.GetUserAsync(username);
+                userInfo.FirstName = user.FirstName;
+                userInfo.LastName = user.LastName; 
+                var response = await userHelper.ChangeUserAsync(user);
+                if (response.Succeeded)
+                {
+                    return Ok("Your information has been updated.");
+                }
+                return BadRequest(response.Errors.FirstOrDefault().Description);
+            }
+            return Unauthorized();  
+        }
+
+        [Authorize]
+        [HttpPost("[action]")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePassword changePassword)
+        {
+            if (HttpContext.User.Identity is ClaimsIdentity identity)
+            {
+                var username = identity.FindFirst(ClaimTypes.Email).Value;
+                var user = await userHelper.GetUserAsync(username);
+                var result = await userHelper.ChangePasswordAsync(user, changePassword.CurrentPassword, changePassword.NewPassword);
+                if (result.Succeeded)
+                {
+                    return Ok("Your password has been updated.");
+                }
+                return BadRequest(result.Errors.FirstOrDefault().Description);
+            }
+            return Unauthorized();  
+        }
     }
 }
