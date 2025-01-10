@@ -31,4 +31,6 @@ public interface IUserHelper
    Task<IdentityResult> ChangeUserAsync(User user);
 
    Task<IdentityResult> ChangePasswordAsync(User user, string currentPassword, string newPassword);
+
+   string GetUserRole(User user);
 }

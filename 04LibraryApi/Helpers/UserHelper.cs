@@ -106,4 +106,9 @@ public class UserHelper : IUserHelper
     {
         return await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
     }
+
+    public string GetUserRole(User user)
+    {
+        return _userManager.GetRolesAsync(user).Result.FirstOrDefault();
+    }
 }

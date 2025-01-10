@@ -41,7 +41,8 @@ namespace _04LibraryApi.Controllers
 
                 var claims = new[]
                 {
-                    new Claim(ClaimTypes.Email, user.Email!)
+                    new Claim(ClaimTypes.Email, user.Email!),
+                    new Claim(ClaimTypes.Role, userHelper.GetUserRole(user))
                 };
 
                 var token = new JwtSecurityToken
