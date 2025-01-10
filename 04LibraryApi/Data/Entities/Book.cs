@@ -14,5 +14,5 @@ public class Book : IEntity
     
     public DateTime PublishDate { get; set; }
     
-    public string ImageURL { get; set; }
+    public string? ImageURL { get; set; }
 }
