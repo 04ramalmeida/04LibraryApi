@@ -2,6 +2,7 @@ using System.Text;
 using _04LibraryApi.Data;
 using _04LibraryApi.Data.Entities;
 using _04LibraryApi.Helpers;
+using _04LibraryApi.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -60,6 +61,9 @@ builder.Services.AddTransient<IUserHelper, UserHelper>();
 builder.Services.AddTransient<IMailHelper, MailHelper>();
 builder.Services.AddTransient<IBlobHelper, BlobHelper>();
 builder.Services.AddTransient<DataSeed>();
+
+builder.Services.AddScoped<IBookRepository, BookRepository>();
+builder.Services.AddScoped<ILibraryRepository, LibraryRepository>();
 
 
 var app = builder.Build();
