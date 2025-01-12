@@ -17,5 +17,5 @@ public class User : IdentityUser
         ? "https://jalmaquablob.blob.core.windows.net/library-avatars/default.png"
         : $"https://jalmaquablob.blob.core.windows.net/library-avatars/{ImageId}";
     
-    public ICollection<Book> Library { get; set; } 
+    
 }

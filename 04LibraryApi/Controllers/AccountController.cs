@@ -5,6 +5,7 @@ using _04LibraryApi.Data;
 using _04LibraryApi.Data.Entities;
 using _04LibraryApi.Data.Models;
 using _04LibraryApi.Helpers;
+using _04LibraryApi.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -17,7 +18,8 @@ namespace _04LibraryApi.Controllers
     public class AccountController(IUserHelper userHelper,
         IConfiguration config,
         IMailHelper mailHelper,
-        IBlobHelper blobHelper) : ControllerBase
+        IBlobHelper blobHelper,
+        ILibraryRepository libraryRepository) : ControllerBase
     {
         
         
@@ -81,9 +83,10 @@ namespace _04LibraryApi.Controllers
                 FirstName = firstname,
                 LastName = lastname,
                 CreatedOn = DateTime.Now,
-                Library = new List<Book>(),
                 ImageId = Guid.Empty
             };
+            
+            
             var result = await userHelper.CreateUserAsync(user, password);
             if (result != IdentityResult.Success)
             {
@@ -91,6 +94,20 @@ namespace _04LibraryApi.Controllers
                 
             }
 
+            Library library = new Library
+            {
+                UserId = user.Id
+            };
+            
+            try
+            {
+                libraryRepository.CreateAsync(library);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+            
             string userToken = await userHelper.GenerateEmailConfirmationTokenAsync(user);
             Response response = mailHelper.SendEmail(username, "Email Confirmation",
                 "To finish your registration, please enter the token \n " +

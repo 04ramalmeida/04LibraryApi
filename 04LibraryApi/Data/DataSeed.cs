@@ -1,5 +1,6 @@
 ﻿using _04LibraryApi.Data.Entities;
 using _04LibraryApi.Helpers;
+using _04LibraryApi.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,12 +10,15 @@ public class DataSeed
 {
     private readonly DataContext _context;
     private readonly IUserHelper _userHelper;
-
+    private readonly ILibraryRepository _libraryRepository;
+    
     public DataSeed(DataContext context,
-        IUserHelper userHelper)
+        IUserHelper userHelper,
+        ILibraryRepository libraryRepository)
     {
         _context = context;
         _userHelper = userHelper;
+        _libraryRepository = libraryRepository;
     }
 
     public async Task InitSeedAsync()
@@ -55,7 +59,23 @@ public class DataSeed
             {
                 throw new InvalidOperationException("Failed to create user");
             }
+            
+            Library library = new Library
+            {
+                UserId = user.Id
+            };
+            
+            try
+            {
+                await _libraryRepository.CreateAsync(library);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
         }
+        
+        
 
         var isInRole = await _userHelper.IsInRoleAsync(user, "Librarian");
         

@@ -185,14 +185,47 @@ namespace _04LibraryApi.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.HasKey("Id");
+
+                    b.ToTable("Books");
+                });
+
+            modelBuilder.Entity("_04LibraryApi.Data.Entities.Library", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.ToTable("Libraries");
+                });
 
-                    b.ToTable("Books");
+            modelBuilder.Entity("_04LibraryApi.Data.Entities.LibraryEntry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BookId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LibraryId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LibraryId");
+
+                    b.ToTable("LibraryEntries");
                 });
 
             modelBuilder.Entity("_04LibraryApi.Data.Entities.User", b =>
@@ -325,16 +358,18 @@ namespace _04LibraryApi.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("_04LibraryApi.Data.Entities.Book", b =>
+            modelBuilder.Entity("_04LibraryApi.Data.Entities.LibraryEntry", b =>
                 {
-                    b.HasOne("_04LibraryApi.Data.Entities.User", null)
-                        .WithMany("Library")
-                        .HasForeignKey("UserId");
+                    b.HasOne("_04LibraryApi.Data.Entities.Library", null)
+                        .WithMany("Books")
+                        .HasForeignKey("LibraryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
-            modelBuilder.Entity("_04LibraryApi.Data.Entities.User", b =>
+            modelBuilder.Entity("_04LibraryApi.Data.Entities.Library", b =>
                 {
-                    b.Navigation("Library");
+                    b.Navigation("Books");
                 });
 #pragma warning restore 612, 618
         }
