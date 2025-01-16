@@ -62,7 +62,7 @@ public class DataSeed
             
             Library library = new Library
             {
-                UserId = user.Id
+                UserId = user.Id,
             };
             
             try
