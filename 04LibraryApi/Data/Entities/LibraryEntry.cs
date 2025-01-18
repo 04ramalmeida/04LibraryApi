@@ -7,4 +7,6 @@ public class LibraryEntry : IEntity
     public int LibraryId { get; set; }
     
     public int BookId { get; set; }
+    
+    public bool HasRead { get; set; }
 }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using _04LibraryApi.Data;
 
@@ -11,9 +12,11 @@ using _04LibraryApi.Data;
 namespace _04LibraryApi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20250110102233_LibraryClassCreation")]
+    partial class LibraryClassCreation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -174,6 +177,9 @@ namespace _04LibraryApi.Migrations
                     b.Property<string>("ImageURL")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("LibraryId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -186,6 +192,8 @@ namespace _04LibraryApi.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("LibraryId");
 
                     b.ToTable("Books");
                 });
@@ -205,30 +213,6 @@ namespace _04LibraryApi.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Libraries");
-                });
-
-            modelBuilder.Entity("_04LibraryApi.Data.Entities.LibraryEntry", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("BookId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("HasRead")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("LibraryId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LibraryId");
-
-                    b.ToTable("LibraryEntries");
                 });
 
             modelBuilder.Entity("_04LibraryApi.Data.Entities.User", b =>
@@ -361,13 +345,11 @@ namespace _04LibraryApi.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("_04LibraryApi.Data.Entities.LibraryEntry", b =>
+            modelBuilder.Entity("_04LibraryApi.Data.Entities.Book", b =>
                 {
                     b.HasOne("_04LibraryApi.Data.Entities.Library", null)
                         .WithMany("Books")
-                        .HasForeignKey("LibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("LibraryId");
                 });
 
             modelBuilder.Entity("_04LibraryApi.Data.Entities.Library", b =>

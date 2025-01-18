@@ -14,6 +14,7 @@ public class DataContext: IdentityDbContext<User>
     public DbSet<Book> Books { get; set; }
     
     public DbSet<Library> Libraries { get; set; }
-
+    
     public DbSet<LibraryEntry> LibraryEntries { get; set; }
+    
 }
