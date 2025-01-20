@@ -78,4 +78,10 @@ public class LibraryRepository: GenericRepository<Library>, ILibraryRepository
         _context.LibraryEntries.Update(libraryEntry);
         await _context.SaveChangesAsync();
     }
+
+    public async Task<Library> GetLibraryByEntryId(int entryId)
+    {
+        var entry = await GetEntryById(entryId);
+        return await _context.Libraries.FirstOrDefaultAsync(l => l.Id == entry.LibraryId);
+    }
 }

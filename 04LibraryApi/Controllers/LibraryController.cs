@@ -93,13 +93,21 @@ public class LibraryController : ControllerBase
     [HttpPost("[action]")]
     public async Task<IActionResult> RemoveLibraryEntry(int entryId)
     {
-        //TODO: Verify user ownership of entry
+        AuthResponse authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity);
         var entry = await _libraryRepository.GetEntryById(entryId);
+        
         if (entry == null)
         {
             return NotFound();
         }
 
+        var library = await _libraryRepository.GetLibraryByEntryId(entryId);
+        
+        if (!authResponse.IsAuthorized || authResponse.User.Id != library.UserId)
+        {
+            return Unauthorized();
+        }
+        
         try
         {
             await _libraryRepository.DeleteLibraryEntry(entryId);
@@ -115,12 +123,21 @@ public class LibraryController : ControllerBase
     [HttpPost("[action]")]
     public async Task<IActionResult> SetEntryReadStatus(int entryId)
     {
-        //TODO: Verify user ownership of entry
+        AuthResponse authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity);
         var entry = await _libraryRepository.GetEntryById(entryId);
+        
         if (entry == null)
         {
             return NotFound();
         }
+
+        var library = await _libraryRepository.GetLibraryByEntryId(entryId);
+        
+        if (!authResponse.IsAuthorized || authResponse.User.Id != library.UserId)
+        {
+            return Unauthorized();
+        }
+        
 
         try
         {
