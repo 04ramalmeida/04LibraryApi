@@ -13,12 +13,15 @@ public class LibraryController : ControllerBase
 {
     private readonly IUserHelper _userHelper;
     private readonly ILibraryRepository _libraryRepository;
+    private readonly IBookRepository _bookRepository;
     
     public LibraryController(ILibraryRepository libraryRepository
-        , IUserHelper userHelper)
+        , IUserHelper userHelper,
+        IBookRepository bookRepository)
     {
         _libraryRepository = libraryRepository;
         _userHelper = userHelper;
+        _bookRepository = bookRepository;
     }
 
     [Authorize]
@@ -29,19 +32,23 @@ public class LibraryController : ControllerBase
         {
             var userEmail = identity.FindFirst(ClaimTypes.Email).Value;
             var user = await _userHelper.GetUserAsync(userEmail);
-            try
+            if (user != null)
             {
-                var libraryEntries = await _libraryRepository.GetLibraryEntriesByUserIdAsync(user.Id);
-                if (!libraryEntries.Any())
+                try
                 {
-                    return NotFound();
+                    var libraryEntries = await _libraryRepository.GetLibraryEntriesByUserIdAsync(user.Id);
+                    if (!libraryEntries.Any())
+                    {
+                        return NotFound();
+                    }
+                    return Ok(libraryEntries);
                 }
-                return Ok(libraryEntries);
+                catch (Exception e)
+                {
+                    return BadRequest(e.Message);
+                }
             }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
+            
         }
         return Unauthorized();
     }
@@ -59,6 +66,12 @@ public class LibraryController : ControllerBase
             if (library == null)
             {
                 return Unauthorized();
+            }
+
+            var book = await _bookRepository.GetByIdAsync(bookId);
+            if (book == null)
+            {
+                return NotFound("Book not found");
             }
             
             LibraryEntry newEntry = new LibraryEntry
