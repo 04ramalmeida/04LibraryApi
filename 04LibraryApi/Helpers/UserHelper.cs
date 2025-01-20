@@ -1,4 +1,5 @@
-﻿using _04LibraryApi.Data;
+﻿using System.Security.Claims;
+using _04LibraryApi.Data;
 using _04LibraryApi.Data.Entities;
 using _04LibraryApi.Data.Models;
 using Microsoft.AspNetCore.Identity;
@@ -31,7 +32,8 @@ public class UserHelper : IUserHelper
             await _roleManager.CreateAsync(new IdentityRole(roleName));
         }
     }
-
+    
+    
     public async Task<User> GetUserAsync(string userName)
     {
         return await _userManager.FindByEmailAsync(userName); 
@@ -67,6 +69,22 @@ public class UserHelper : IUserHelper
         return await _signInManager.PasswordSignInAsync(user, password, false, false);
     }
 
+    public async Task<AuthResponse> VerifyLogin(object auth)
+    {
+        AuthResponse result = new AuthResponse();
+        if (auth is ClaimsIdentity identity)
+        {
+            var username = identity.FindFirst(ClaimTypes.Email).Value;
+            var user = await _userManager.FindByNameAsync(username);
+            if (user != null)
+            {
+                result.User = user;
+                result.IsAuthorized = true;
+            }
+        }
+        return result;
+    }
+    
     public async Task<UserInfo> GetUserInfoAsync(string userName)
     {
         var user = await GetUserAsync(userName);

@@ -1,4 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Security.Claims;
 using System.Text;
 using _04LibraryApi.Data;
@@ -26,14 +27,14 @@ namespace _04LibraryApi.Controllers
         
         
         [HttpPost("[action]")]
-        public async Task<IActionResult> Login(string username, string password)
+        public async Task<IActionResult> Login([FromBody]Login login)
         {
-            var user = await userHelper.GetUserAsync(username);
+            var user = await userHelper.GetUserAsync(login.Username);
             if (user == null)
             {
                 return BadRequest("Wrong username or password.");
             }
-            var loginResult = await userHelper.LoginAsync(user, password);
+            var loginResult = await userHelper.LoginAsync(user, login.Password);
             if (loginResult.Succeeded)
             {
                 var key = config["Jwt:Secret"] ?? throw new ArgumentNullException("Jwt:Secret", "Jwt:Secret cannot be null.");
@@ -43,7 +44,7 @@ namespace _04LibraryApi.Controllers
 
                 var claims = new[]
                 {
-                    new Claim(ClaimTypes.Email, user.Email!),
+                    new Claim(ClaimTypes.Email, user.Email),
                     new Claim(ClaimTypes.Role, userHelper.GetUserRole(user))
                 };
 
@@ -71,29 +72,28 @@ namespace _04LibraryApi.Controllers
         }
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> Register(string username,
-            string password,
-            string firstname,
-            string lastname)
+        public async Task<IActionResult> Register([FromBody]Register register)
         {
             User user = new User
             {
-                UserName = username,
-                Email = username,
-                FirstName = firstname,
-                LastName = lastname,
+                UserName = register.Username,
+                Email = register.Username,
+                FirstName = register.FirstName,
+                LastName = register.LastName,
                 CreatedOn = DateTime.Now,
                 ImageId = Guid.Empty
             };
             
             
-            var result = await userHelper.CreateUserAsync(user, password);
+            var result = await userHelper.CreateUserAsync(user, register.Password);
             if (result != IdentityResult.Success)
             {
                 return BadRequest(result.Errors.FirstOrDefault().Description);
                 
             }
 
+            await userHelper.AddUserToRoleAsync(user, "User");
+            
             Library library = new Library
             {
                 UserId = user.Id
@@ -101,7 +101,7 @@ namespace _04LibraryApi.Controllers
             
             try
             {
-                libraryRepository.CreateAsync(library);
+                await libraryRepository.CreateAsync(library);
             }
             catch (Exception e)
             {
@@ -109,15 +109,15 @@ namespace _04LibraryApi.Controllers
             }
             
             string userToken = await userHelper.GenerateEmailConfirmationTokenAsync(user);
-            Response response = mailHelper.SendEmail(username, "Email Confirmation",
+            MailResponse mailResponse = mailHelper.SendEmail(register.Username, "Email Confirmation",
                 "To finish your registration, please enter the token \n " +
                 $"{userToken}");
 
-            if (response.IsSuccess)
+            if (mailResponse.IsSuccess)
             {
                 return Ok("The user has been created.");
             }
-            return BadRequest(response.Message);
+            return BadRequest(mailResponse.Message);
         }
 
         [HttpPost("[action]")]
@@ -145,15 +145,15 @@ namespace _04LibraryApi.Controllers
                return NotFound("No user found."); 
             }
             string token = await userHelper.GeneratePasswordResetTokenAsync(user);
-            Response response = mailHelper.SendEmail(email, "Password Recovery",
+            MailResponse mailResponse = mailHelper.SendEmail(email, "Password Recovery",
                 "To reset your password, enter this token on the app:\n " +
                 $"{token}");
 
-            if (response.IsSuccess)
+            if (mailResponse.IsSuccess)
             {
                 return Ok("Check your email for further instructions.");
             }
-            return BadRequest(response.Message);
+            return BadRequest(mailResponse.Message);
         }
 
 
@@ -179,92 +179,92 @@ namespace _04LibraryApi.Controllers
         [HttpGet("[action]")]
         public async Task<IActionResult> GetUserInfo()
         {
-            if (HttpContext.User.Identity is ClaimsIdentity identity)
+            AuthResponse authResponse = await userHelper.VerifyLogin(HttpContext.User.Identity);
+            if (!authResponse.IsAuthorized)
             {
-                var username = identity.FindFirst(ClaimTypes.Email).Value;
-                var userInfo = await userHelper.GetUserInfoAsync(username);
-                return Ok(userInfo);
+                return Unauthorized();
             }
-
-            return Unauthorized();
+            var userInfo = await userHelper.GetUserInfoAsync(authResponse.User.UserName);
+            return Ok(userInfo);
         }
 
         [Authorize]
         [HttpGet("[action]")]
         public async Task<IActionResult> GetUserPic()
         {
-            if (HttpContext.User.Identity is ClaimsIdentity identity)
+            AuthResponse authResponse = await userHelper.VerifyLogin(HttpContext.User.Identity);
+            if (!authResponse.IsAuthorized)
             {
-                var username = identity.FindFirst(ClaimTypes.Email).Value;
-                var user = await userHelper.GetUserAsync(username);
-                return Ok(user.ImagePath);
+                return Unauthorized();
             }
-            return Unauthorized();  
+
+            return Ok(authResponse.User.ImagePath);
         }
         
         [Authorize]
         [HttpPost("[action]")]
         public async Task<IActionResult> UploadPic(IFormFile file)
         {
-            if (HttpContext.User.Identity is ClaimsIdentity identity)
+            AuthResponse authResponse = await userHelper.VerifyLogin(HttpContext.User.Identity);
+            if (!authResponse.IsAuthorized)
             {
-                var username = identity.FindFirst(ClaimTypes.Email).Value;
-                var user = await userHelper.GetUserAsync(username);
-                try
-                {
-                    Guid imageId = await blobHelper.UploadBlobAsync(file);
-                    user.ImageId = imageId;
-                    var response = await userHelper.ChangeUserAsync(user);
-                    if (response.Succeeded)
-                    {
-                        return Ok("The new picture has been set.");
-                    }
-                    return BadRequest(response.Errors.FirstOrDefault().Description);
-                }
-                catch (Exception e)
-                {
-                    return BadRequest(e.Message);
-                }
+                return Unauthorized();
             }
-            return Unauthorized();
+
+            try
+            {
+                Guid imageId = await blobHelper.UploadBlobAsync(file);
+                authResponse.User.ImageId = imageId;
+                var response = await userHelper.ChangeUserAsync(authResponse.User);
+                if (response.Succeeded)
+                {
+                    return Ok("The new picture has been set.");
+                }
+                return BadRequest(response.Errors.FirstOrDefault().Description);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+            
         }
 
         [Authorize]
         [HttpPost("[action]")]
         public async Task<IActionResult> ChangeUserInfo([FromBody] UserInfo userInfo)
         {
-            if (HttpContext.User.Identity is ClaimsIdentity identity)
+            var authResponse = await userHelper.VerifyLogin(HttpContext.User.Identity);
+            if (!authResponse.IsAuthorized)
             {
-                var username = identity.FindFirst(ClaimTypes.Email).Value;
-                var user = await userHelper.GetUserAsync(username);
-                userInfo.FirstName = user.FirstName;
-                userInfo.LastName = user.LastName; 
-                var response = await userHelper.ChangeUserAsync(user);
-                if (response.Succeeded)
-                {
-                    return Ok("Your information has been updated.");
-                }
-                return BadRequest(response.Errors.FirstOrDefault().Description);
+                return Unauthorized();
             }
-            return Unauthorized();  
+            authResponse.User.FirstName = userInfo.FirstName;
+            authResponse.User.LastName = userInfo.LastName;
+            var response = await userHelper.ChangeUserAsync(authResponse.User);
+            if (response.Succeeded)
+            {
+                return Ok("Your information has been updated.");
+            }
+            return BadRequest(response.Errors.FirstOrDefault().Description);
+             
         }
 
         [Authorize]
         [HttpPost("[action]")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePassword changePassword)
         {
-            if (HttpContext.User.Identity is ClaimsIdentity identity)
+            AuthResponse authResponse = await userHelper.VerifyLogin(HttpContext.User.Identity);
+            if (!authResponse.IsAuthorized)
             {
-                var username = identity.FindFirst(ClaimTypes.Email).Value;
-                var user = await userHelper.GetUserAsync(username);
-                var result = await userHelper.ChangePasswordAsync(user, changePassword.CurrentPassword, changePassword.NewPassword);
-                if (result.Succeeded)
-                {
-                    return Ok("Your password has been updated.");
-                }
-                return BadRequest(result.Errors.FirstOrDefault().Description);
+                return Unauthorized();
             }
-            return Unauthorized();  
+            var result = await userHelper.ChangePasswordAsync(authResponse.User, changePassword.CurrentPassword, changePassword.NewPassword);
+            if (result.Succeeded)
+            {
+                return Ok("Your password has been updated.");
+            }
+            return BadRequest(result.Errors.FirstOrDefault().Description);
+              
         }
     }
 }

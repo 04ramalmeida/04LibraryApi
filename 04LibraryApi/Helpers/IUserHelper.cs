@@ -1,4 +1,5 @@
-﻿using _04LibraryApi.Data.Entities;
+﻿using _04LibraryApi.Data;
+using _04LibraryApi.Data.Entities;
 using _04LibraryApi.Data.Models;
 using Microsoft.AspNetCore.Identity;
 
@@ -22,6 +23,8 @@ public interface IUserHelper
     
    Task<SignInResult> LoginAsync(User user, string password);
 
+   Task<AuthResponse> VerifyLogin(object auth);
+   
    Task<UserInfo> GetUserInfoAsync(string userName);
 
    Task<string> GeneratePasswordResetTokenAsync(User user);

@@ -13,7 +13,7 @@ public class MailHelper : IMailHelper
         _configuration = configuration;
     }
 
-    public Response SendEmail(string to, string subject, string body)
+    public MailResponse SendEmail(string to, string subject, string body)
     {
         var nameFrom = _configuration["Mail:NameFrom"];
         var from  = _configuration["Mail:From"];
@@ -44,14 +44,14 @@ public class MailHelper : IMailHelper
         }
         catch (Exception e)
         {
-            return new Response
+            return new MailResponse
             {
                 IsSuccess = false,
                 Message = e.ToString()
             };
         }
 
-        return new Response
+        return new MailResponse
         {
             IsSuccess = true
         };

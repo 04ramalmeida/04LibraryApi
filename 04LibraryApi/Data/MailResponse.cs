@@ -1,6 +1,6 @@
 ﻿namespace _04LibraryApi.Data;
 
-public class Response
+public class MailResponse
 {
     public bool IsSuccess { get; set; }
 

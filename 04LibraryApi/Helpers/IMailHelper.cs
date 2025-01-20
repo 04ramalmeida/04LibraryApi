@@ -4,5 +4,5 @@ namespace _04LibraryApi.Helpers;
 
 public interface IMailHelper
 {
-    Response SendEmail(string to, string subject, string body);
+    MailResponse SendEmail(string to, string subject, string body);
 }
