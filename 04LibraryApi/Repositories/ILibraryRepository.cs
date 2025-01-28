@@ -19,5 +19,8 @@ public interface ILibraryRepository : IGenericRepository<Library>
     Task SetHasRead(int entryId);
 
     Task<Library> GetLibraryByEntryId(int entryId);
+    
+    Task<bool> VerifyBookAlreadyHasEntry(int bookId, string userId);
+
 
 }

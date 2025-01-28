@@ -26,8 +26,8 @@ public class LibraryController : ControllerBase
     }
 
     [Authorize]
-    [HttpGet("[action]")]
-    public async Task<IActionResult> GetLibraryEntries()
+    [HttpGet("entries")]
+    public async Task<IActionResult> GetLibraryEntries(int? entryId)
     {
         AuthResponse authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity);
         if (!authResponse.IsAuthorized)
@@ -41,17 +41,27 @@ public class LibraryController : ControllerBase
             {
                 return NotFound();
             }
+
+            if (entryId != null)
+            {
+                var result = libraryEntries.FirstOrDefault(le => le.Id == entryId);
+                if (result == null)
+                {
+                    return NotFound();
+                }
+                return Ok(result);
+            }
             return Ok(libraryEntries);
         }
         catch (Exception e)
         {
-            return BadRequest(e.Message);
+            return StatusCode(500, e.Message);
         }
         
     }
 
     [Authorize]
-    [HttpPost("[action]")]
+    [HttpPost("entries")]
     public async Task<IActionResult> AddLibraryEntry(int bookId)
     {
         AuthResponse authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity);
@@ -71,7 +81,11 @@ public class LibraryController : ControllerBase
         {
             return NotFound("Book not found");
         }
-            
+
+        var bookExists = await _libraryRepository.VerifyBookAlreadyHasEntry(bookId, authResponse.User.Id);
+        
+        if (bookExists) return BadRequest("Book already exists");
+        
         LibraryEntry newEntry = new LibraryEntry
         {
             BookId = bookId,
@@ -84,13 +98,13 @@ public class LibraryController : ControllerBase
         }
         catch (Exception e)
         {
-            return BadRequest(e.Message);
+            return StatusCode(500, e.Message);
         }
         return Ok();
     }
 
     [Authorize]
-    [HttpPost("[action]")]
+    [HttpDelete("entries")]
     public async Task<IActionResult> RemoveLibraryEntry(int entryId)
     {
         AuthResponse authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity);
@@ -114,13 +128,13 @@ public class LibraryController : ControllerBase
         }
         catch (Exception e)
         {
-            return BadRequest(e.Message);
+            return StatusCode(500, e.Message);
         }
         return Ok();
     }
 
     [Authorize]
-    [HttpPost("[action]")]
+    [HttpPut("entries/status")]
     public async Task<IActionResult> SetEntryReadStatus(int entryId)
     {
         AuthResponse authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity);
@@ -145,7 +159,7 @@ public class LibraryController : ControllerBase
         }
         catch (Exception e)
         {
-            return BadRequest(e.Message);
+            return StatusCode(500, e.Message);
         }
         return Ok();
     }

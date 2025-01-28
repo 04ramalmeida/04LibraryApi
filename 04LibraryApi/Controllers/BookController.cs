@@ -19,7 +19,7 @@ public class BookController : ControllerBase
     }
     
     [Authorize(Roles = "Librarian")]
-    [HttpPost("[action]")]
+    [HttpPost("book")]
     public IActionResult AddBook(BookInfo bookInfo)
     {
         Book newBook = new Book
@@ -38,26 +38,39 @@ public class BookController : ControllerBase
         }
         catch (Exception e)
         {
-            return BadRequest(e.Message);
+            return StatusCode(500, e.Message);
         }
         return Ok("Book added");
     }
 
     [Authorize]
-    [HttpGet("[action]")]
-    public async Task<IActionResult> GetBook(int id)
+    [HttpGet("book")]
+    public async Task<IActionResult> GetBook(int? id)
     {
-        var book = await _bookRepository.GetByIdAsync(id);
-
-        if (book == null)
+        if (id != null)
         {
-            return NotFound();
+            var book = await _bookRepository.GetByIdAsync((int)id);
+
+            if (book == null)
+            {
+                return NotFound();
+            }
+            return Ok(book);
         }
-        return Ok(book);
+        else
+        {
+            var book = _bookRepository.GetAll().ToList();
+
+            if (book == null)
+            {
+                return NotFound();
+            }
+            return Ok(book);
+        }
     }
 
     [Authorize(Roles = "Librarian")]
-    [HttpPost("[action]")]
+    [HttpPut("book")]
     public async Task<IActionResult> UpdateBook(int id, [FromBody]BookInfo bookInfo)
     {
         var book = await _bookRepository.GetByIdAsync(id);
@@ -80,14 +93,14 @@ public class BookController : ControllerBase
         }
         catch (Exception e)
         {
-            return BadRequest(e.Message);
+            return StatusCode(500, e.Message);
         }
         
         return Ok("Book updated");
     }
 
     [Authorize(Roles = "Librarian")]
-    [HttpPost("[action]")]
+    [HttpDelete("book")]
     public async Task<IActionResult> DeleteBook(int id)
     {
         var book = await _bookRepository.GetByIdAsync(id);
@@ -103,7 +116,7 @@ public class BookController : ControllerBase
         }
         catch (Exception e)
         {
-            return BadRequest(e.Message);
+            return StatusCode(500, e.Message);
         }
         
         return Ok("Book deleted");

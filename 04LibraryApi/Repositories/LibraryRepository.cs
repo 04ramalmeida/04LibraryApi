@@ -84,4 +84,15 @@ public class LibraryRepository: GenericRepository<Library>, ILibraryRepository
         var entry = await GetEntryById(entryId);
         return await _context.Libraries.FirstOrDefaultAsync(l => l.Id == entry.LibraryId);
     }
+
+    public async Task<LibraryEntry?> GetEntryByBookId(int bookId)
+    {
+        var entry = await _context.LibraryEntries.FirstOrDefaultAsync(l => l.BookId == bookId);
+        return entry;
+    }
+
+    public async Task<bool> VerifyBookAlreadyHasEntry(int bookId, string userId)
+    {
+        return (await GetLibraryEntriesByUserIdAsync(userId)).Select(b => b.Id == bookId).Any();
+    }
 }
