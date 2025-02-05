@@ -201,8 +201,9 @@ public class AuthController : ControllerBase
 		return StatusCode(500, result.Errors.FirstOrDefault().Description);
 	}
 	
+	
 	[Authorize]
-	[HttpGet]
+	[HttpGet("verify-login")]
 	public async Task<IActionResult> VerifyLogin() 
 	{
 		AuthResponse authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity);
