@@ -203,7 +203,7 @@ public class AuthController : ControllerBase
 	
 	[Authorize]
 	[HttpGet]
-	public async Task<IActionResult> VerifyLogin([FromBody]string token) 
+	public async Task<IActionResult> VerifyLogin() 
 	{
 		AuthResponse authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity);
 		if (!authResponse.IsAuthorized) return Unauthorized();
