@@ -200,4 +200,14 @@ public class AuthController : ControllerBase
 		}
 		return StatusCode(500, result.Errors.FirstOrDefault().Description);
 	}
+	
+	[Authorize]
+	[HttpGet]
+	public async Task<IActionResult> VerifyLogin([FromBody]string token) 
+	{
+		AuthResponse authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity);
+		if (!authResponse.IsAuthorized) return Unauthorized();
+		return Ok("");
+
+	}
 }
