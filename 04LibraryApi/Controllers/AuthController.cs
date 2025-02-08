@@ -142,6 +142,11 @@ public class AuthController : ControllerBase
 		{
 			return Ok("Email confirmed");
 		}
+
+		if (result.Errors.FirstOrDefault().Description == "Invalid token.")
+		{
+			return StatusCode(400, result.Errors.FirstOrDefault().Description);
+		}
 		return StatusCode(500, result.Errors.FirstOrDefault().Description);
 	}
 
@@ -179,6 +184,11 @@ public class AuthController : ControllerBase
 		if (result.Succeeded)
 		{
 			return Ok("Password reset succesful.");
+		}
+		
+		if (result.Errors.FirstOrDefault().Description == "Invalid token.")
+		{
+			return StatusCode(400, result.Errors.FirstOrDefault().Description);
 		}
 		
 		return StatusCode(500, result.Errors.FirstOrDefault().Description);

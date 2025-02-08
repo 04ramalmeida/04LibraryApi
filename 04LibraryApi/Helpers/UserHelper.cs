@@ -98,7 +98,6 @@ public class UserHelper : IUserHelper
         return userInfo;
     }
 
-
     public async Task<IdentityResult> RegisterUserAsync(User user, string password)
     {
         var result = await _userManager.CreateAsync(user, password);
