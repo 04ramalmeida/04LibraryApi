@@ -150,8 +150,8 @@ public class AuthController : ControllerBase
 		return StatusCode(500, result.Errors.FirstOrDefault().Description);
 	}
 
-	[HttpPost("forgot-password")]
-	public async Task<IActionResult> ForgotPassword([FromBody] string email)
+	[HttpPost("reset-password")]
+	public async Task<IActionResult> ResetPassword([FromBody] string email)
 	{
 		var user = await _userHelper.GetUserAsync(email);
 		if (user == null)
@@ -166,7 +166,7 @@ public class AuthController : ControllerBase
 
 		if (mailResponse.IsSuccess)
 		{
-			return Ok("Password reset");
+			return Ok("Check your email for the recovery token.");
 		}
 		return StatusCode(500, mailResponse.Message);
 	}
@@ -183,7 +183,7 @@ public class AuthController : ControllerBase
 
 		if (result.Succeeded)
 		{
-			return Ok("Password reset succesful.");
+			return Ok("Password reset successful.");
 		}
 		
 		if (result.Errors.FirstOrDefault().Description == "Invalid token.")
