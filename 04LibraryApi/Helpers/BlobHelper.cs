@@ -11,9 +11,9 @@ public class BlobHelper : IBlobHelper
 
     public BlobHelper(IConfiguration configuration)
     {
-        string connectionString = configuration["Blob:ConnectionString"];
+        string connectionString = configuration["AzureString:Blob"];
         _blobServiceClient = new BlobServiceClient(connectionString);
-        _blobContainerClient = _blobServiceClient.GetBlobContainerClient(configuration["Blob:ContainerName"]);
+        _blobContainerClient = _blobServiceClient.GetBlobContainerClient(configuration["AzureString:Blob"]);
     }
 
     public async Task<Guid> UploadBlobAsync(IFormFile file)
