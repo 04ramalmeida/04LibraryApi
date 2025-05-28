@@ -113,22 +113,6 @@ namespace _04LibraryApi.Controllers
              
         }
 
-        [Authorize]
-        [HttpPut("change-password")]
-        public async Task<IActionResult> ChangePassword([FromBody] ChangePassword changePassword)
-        {
-            AuthResponse authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity);
-            if (!authResponse.IsAuthorized)
-            {
-                return Unauthorized();
-            }
-            var result = await _userHelper.ChangePasswordAsync(authResponse.User, changePassword.CurrentPassword, changePassword.NewPassword);
-            if (result.Succeeded)
-            {
-                return Ok("Your password has been updated.");
-            }
-            return StatusCode(500, result.Errors.FirstOrDefault().Description);
-              
-        }
+        
     }
 }
