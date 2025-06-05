@@ -74,8 +74,8 @@ public class UserHelper : IUserHelper
         AuthResponse result = new AuthResponse();
         if (auth is ClaimsIdentity identity)
         {
-            var username = identity.FindFirst(ClaimTypes.Email).Value;
-            var user = await _userManager.FindByNameAsync(username);
+            var email = identity.FindFirst(ClaimTypes.Email).Value;
+            var user = await _userManager.FindByEmailAsync(email);
             if (user != null)
             {
                 result.User = user;

@@ -25,6 +25,7 @@ public class LibraryController : ControllerBase
         _bookRepository = bookRepository;
     }
 
+    //Change to return more than just the book, it currently doesn't return the reading status
     [Authorize]
     [HttpGet("entries")]
     public async Task<IActionResult> GetLibraryEntries(int? entryId)
@@ -60,6 +61,7 @@ public class LibraryController : ControllerBase
         
     }
 
+    
     [Authorize]
     [HttpPost("entries")]
     public async Task<IActionResult> AddLibraryEntry(int bookId)

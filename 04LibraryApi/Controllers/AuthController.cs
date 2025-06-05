@@ -41,10 +41,10 @@ public class AuthController : ControllerBase
 	[HttpPost("login")]
 	public async Task<IActionResult> Login([FromBody]LoginInfo loginInfo) 
 	{
-		var user = await _userHelper.GetUserAsync(loginInfo.Username);
+		var user = await _userHelper.GetUserAsync(loginInfo.Email);
 		if (user == null)
 		{
-			return BadRequest("Wrong username or password.");
+			return BadRequest("Wrong email or password.");
 		}
 		var loginResult = await _userHelper.LoginAsync(user, loginInfo.Password);
 		if (loginResult.Succeeded)
@@ -76,10 +76,10 @@ public class AuthController : ControllerBase
 				AccessToken = jwt,
 				TokenType = "Bearer",
 				UserId = user.Id,
-				user.UserName
+				user.Email
 			});
 		}
-		return BadRequest("Wrong username or password.");
+		return BadRequest("Wrong email or password.");
 	}
 	
 	[HttpPost("register")]
@@ -88,7 +88,7 @@ public class AuthController : ControllerBase
 		User user = new User
 		{
 			UserName = registerInfo.Username,
-			Email = registerInfo.Username,
+			Email = registerInfo.Email,
 			FirstName = registerInfo.FirstName,
 			LastName = registerInfo.LastName,
 			CreatedOn = DateTime.Now,
@@ -118,7 +118,7 @@ public class AuthController : ControllerBase
 		}
 
 		string userToken = await _userHelper.GenerateEmailConfirmationTokenAsync(user);
-		MailResponse mailResponse = _mailHelper.SendEmail(registerInfo.Username, "Email Confirmation",
+		MailResponse mailResponse = _mailHelper.SendEmail(registerInfo.Email, "Email Confirmation",
 			"To finish your registration, please enter the token \n " +
 			$"{userToken}");
 
@@ -132,10 +132,10 @@ public class AuthController : ControllerBase
 	[HttpPut("confirm")]
 	public async Task<IActionResult> ConfirmEmail([FromBody]EmailConfirmation confirmation)
 	{
-		var user = await _userHelper.GetUserAsync(confirmation.Username);
+		var user = await _userHelper.GetUserAsync(confirmation.Email);
 		if (user == null)
 		{
-			return NotFound("Wrong username or token.");
+			return NotFound("Wrong email or token.");
 		}
 		var result = await _userHelper.ConfirmEmailAsync(user, confirmation.Token);
 		if (result.Succeeded)

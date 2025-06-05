@@ -40,7 +40,7 @@ namespace _04LibraryApi.Controllers
 
         [Authorize]
         [HttpGet("user-info")]
-        public async Task<IActionResult> GetUserInfo()
+        public async Task<IActionResult> GetUserInfo(string? username)
         {
             AuthResponse authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity);
             if (!authResponse.IsAuthorized)
@@ -48,6 +48,7 @@ namespace _04LibraryApi.Controllers
                 return Unauthorized();
             }
             //TODO: Make sure only the user can get their info
+            
             var userInfo = await _userHelper.GetUserInfoAsync(authResponse.User.UserName);
             return Ok(userInfo);
         }

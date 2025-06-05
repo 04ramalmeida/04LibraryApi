@@ -47,7 +47,7 @@ public class DataSeed
                 FirstName = "Master",
                 LastName = "Librarian",
                 Email = "masterlibrarian@library.com",
-                UserName = "masterlibrarian@library.com",
+                UserName = "masterlibrarian",
                 PhoneNumber = "123456789",
                 CreatedOn = DateTime.Now,
                 ImageId = Guid.Empty
@@ -100,7 +100,7 @@ public class DataSeed
                 FirstName = "Admin",
                 LastName = "Library",
                 Email = "admin@library.com",
-                UserName = "admin@library.com",
+                UserName = "admin",
                 PhoneNumber = "123456789",
                 CreatedOn = DateTime.Now,
                 ImageId = Guid.Empty
