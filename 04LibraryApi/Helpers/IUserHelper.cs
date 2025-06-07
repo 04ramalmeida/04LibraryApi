@@ -7,9 +7,13 @@ namespace _04LibraryApi.Helpers;
 
 public interface IUserHelper
 {
+    Task<User> GetUserAsync(string email);
+    
     Task CheckRoleAsync(string roleName);
     
-    Task<User> GetUserAsync(string userName);
+    Task<PrivateUserInfo> GetPrivateUserInfoAsync(string userName);
+
+    Task<PublicUserInfo> GetPublicUserInfoAsync(string userName);
     
     Task<IdentityResult> CreateUserAsync(User user, string password);
     
@@ -25,7 +29,6 @@ public interface IUserHelper
 
    Task<AuthResponse> VerifyLogin(object auth);
    
-   Task<UserInfo> GetUserInfoAsync(string userName);
 
    Task<string> GeneratePasswordResetTokenAsync(User user);
 
@@ -36,4 +39,6 @@ public interface IUserHelper
    Task<IdentityResult> ChangePasswordAsync(User user, string currentPassword, string newPassword);
 
    string GetUserRole(User user);
+
+   Task<User> GetUserFromUserNameAsync(string userName);
 }

@@ -34,9 +34,9 @@ public class UserHelper : IUserHelper
     }
     
     
-    public async Task<User> GetUserAsync(string userName)
+    public async Task<User> GetUserAsync(string email)
     {
-        return await _userManager.FindByEmailAsync(userName); 
+        return await _userManager.FindByEmailAsync(email); 
     }
 
     public async Task<IdentityResult> CreateUserAsync(User user, string password)
@@ -85,19 +85,33 @@ public class UserHelper : IUserHelper
         return result;
     }
     
-    public async Task<UserInfo> GetUserInfoAsync(string userName)
+    public async Task<PrivateUserInfo> GetPrivateUserInfoAsync(string userName)
     {
-        var user = await GetUserAsync(userName);
-        var userInfo = new UserInfo
+        var user = await GetUserFromUserNameAsync(userName);
+        var userInfo = new PrivateUserInfo
         {
             FirstName = user.FirstName,
             LastName = user.LastName,
+            UserName = user.UserName,
             Email = user.Email,
             CreatedOn = user.CreatedOn
         };
         return userInfo;
     }
 
+    public async Task<PublicUserInfo> GetPublicUserInfoAsync(string userName)
+    {
+        var user = await GetUserFromUserNameAsync(userName);
+        var userInfo = new PublicUserInfo
+        {
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            UserName = user.UserName,
+            CreatedOn = user.CreatedOn
+        };
+        return userInfo;
+    }
+    
     public async Task<IdentityResult> RegisterUserAsync(User user, string password)
     {
         var result = await _userManager.CreateAsync(user, password);
@@ -127,5 +141,10 @@ public class UserHelper : IUserHelper
     public string GetUserRole(User user)
     {
         return _userManager.GetRolesAsync(user).Result.FirstOrDefault();
+    }
+
+    public Task<User> GetUserFromUserNameAsync(string userName)
+    {
+        return _userManager.FindByNameAsync(userName);
     }
 }

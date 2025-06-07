@@ -47,10 +47,19 @@ namespace _04LibraryApi.Controllers
             {
                 return Unauthorized();
             }
-            //TODO: Make sure only the user can get their info
             
-            var userInfo = await _userHelper.GetUserInfoAsync(authResponse.User.UserName);
-            return Ok(userInfo);
+            
+            if (HttpContext.User.Identity.Name == username)
+            {
+                var userInfo = await _userHelper.GetPrivateUserInfoAsync(authResponse.User.UserName);
+                return Ok(userInfo);
+            }
+            else
+            {
+                var userInfo =  await _userHelper.GetPublicUserInfoAsync(authResponse.User.UserName);
+                return Ok(userInfo);
+            }
+            
         }
 
         [Authorize]
