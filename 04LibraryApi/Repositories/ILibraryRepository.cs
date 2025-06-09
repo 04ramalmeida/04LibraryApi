@@ -4,7 +4,7 @@ namespace _04LibraryApi.Repositories;
 
 public interface ILibraryRepository : IGenericRepository<Library>
 {
-    Task<IEnumerable<Book>> GetLibraryEntriesByUserIdAsync(string userId);
+    Task<IEnumerable<LibraryEntry>> GetLibraryEntriesByUserIdAsync(string userId);
 
     Task<Library> GetLibraryByUserId(string userId);
 

@@ -19,7 +19,7 @@ public class LibraryRepository: GenericRepository<Library>, ILibraryRepository
         return await _context.Libraries.FirstOrDefaultAsync(l => l.UserId == userId);
     }
     
-    public async Task<IEnumerable<Book>> GetLibraryEntriesByUserIdAsync(string userId)
+    public async Task<IEnumerable<LibraryEntry>> GetLibraryEntriesByUserIdAsync(string userId)
     {
         var libraryId = await _context.Libraries
             .Where(l => l.UserId == userId)
@@ -30,7 +30,7 @@ public class LibraryRepository: GenericRepository<Library>, ILibraryRepository
             .Where(e => e.LibraryId == libraryId)
             .ToListAsync();
         
-        return AggregateBooksFromEntries(libraryEntries);
+        return libraryEntries;
 
     }
 
