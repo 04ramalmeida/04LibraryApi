@@ -31,5 +31,5 @@ public class LibraryEntry : IEntity
     }
     
     [MaxLength(260)]
-    public string? Review {get; set;}
+    public string Review {get; set;} = String.Empty;
 }

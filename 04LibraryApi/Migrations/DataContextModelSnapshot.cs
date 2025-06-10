@@ -228,6 +228,7 @@ namespace _04LibraryApi.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Review")
+                        .IsRequired()
                         .HasMaxLength(260)
                         .HasColumnType("nvarchar(260)");
 
