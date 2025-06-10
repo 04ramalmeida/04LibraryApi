@@ -95,4 +95,20 @@ public class LibraryRepository: GenericRepository<Library>, ILibraryRepository
     {
         return (await GetLibraryEntriesByUserIdAsync(userId)).Select(b => b.Id == bookId).Any();
     }
+
+    public async Task SetRating(int entryId, int rating)
+    {
+        var entry = await GetEntryById(entryId);
+        entry.Rating = rating;
+        _context.LibraryEntries.Update(entry);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task SetReview(int entryId, string review)
+    {
+        var entry = await GetEntryById(entryId);
+        entry.Review = review;
+        _context.LibraryEntries.Update(entry);
+        await _context.SaveChangesAsync();
+    }
 }

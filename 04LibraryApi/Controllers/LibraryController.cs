@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 using _04LibraryApi.Data;
 using _04LibraryApi.Data.Entities;
 using _04LibraryApi.Helpers;
@@ -158,6 +159,77 @@ public class LibraryController : ControllerBase
         try
         {
             await _libraryRepository.SetHasRead(entryId);
+        }
+        catch (Exception e)
+        {
+            return StatusCode(500, e.Message);
+        }
+        return Ok();
+    }
+
+    [Authorize]
+    [HttpPut("entries/rating")]
+    public async Task<IActionResult> SetRating(int entryId, int rating)
+    {
+
+        if (rating < 1 || rating > 5)
+        {
+            return BadRequest("The rating must be between 1 and 5.");
+        }
+        
+        AuthResponse authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity);
+        var entry = await _libraryRepository.GetEntryById(entryId);
+
+        if (entry == null)
+        {
+            return NotFound();
+        }
+        
+        var library = await _libraryRepository.GetLibraryByEntryId(entryId);
+        
+        if (!authResponse.IsAuthorized || authResponse.User.Id != library.UserId)
+        {
+            return Unauthorized();
+        }
+
+        try
+        {
+            await _libraryRepository.SetRating(entryId, rating);
+        }
+        catch (Exception e)
+        {
+            return StatusCode(500, e.Message);
+        }
+        return Ok();
+    }
+
+    [Authorize]
+    [HttpPut("entries/review")]
+    public async Task<IActionResult> SetReview(int entryId, [FromBody]string review)
+    {
+        if (review.Length > 260)
+        {
+            return BadRequest("The review exceeds the maximum length of 260 characters.");
+        }
+        
+        AuthResponse authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity);
+        var entry = await _libraryRepository.GetEntryById(entryId);
+
+        if (entry == null)
+        {
+            return NotFound();
+        }
+        
+        var library = await _libraryRepository.GetLibraryByEntryId(entryId);
+
+        if (!authResponse.IsAuthorized || authResponse.User.Id != library.UserId)
+        {
+            return Unauthorized();
+        }
+        
+        try
+        {
+            await _libraryRepository.SetReview(entryId, review);
         }
         catch (Exception e)
         {
