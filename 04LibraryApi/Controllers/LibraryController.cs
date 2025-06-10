@@ -207,9 +207,9 @@ public class LibraryController : ControllerBase
     [HttpPut("entries/review")]
     public async Task<IActionResult> SetReview(int entryId, [FromBody]string review)
     {
-        if (review.Length > 260)
+        if (review.Length > 1024)
         {
-            return BadRequest("The review exceeds the maximum length of 260 characters.");
+            return BadRequest("The review exceeds the maximum length of 1024 characters.");
         }
         
         AuthResponse authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity);

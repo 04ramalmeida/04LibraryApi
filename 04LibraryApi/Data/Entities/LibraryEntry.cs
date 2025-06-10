@@ -30,6 +30,6 @@ public class LibraryEntry : IEntity
         }
     }
     
-    [MaxLength(260)]
-    public string Review {get; set;} = String.Empty;
+    [MaxLength(1024)]
+    public string? Review {get; set;}
 }
