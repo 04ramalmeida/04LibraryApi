@@ -221,4 +221,21 @@ public class AuthController : ControllerBase
 		return Ok("");
 
 	}
+
+	[Authorize]
+	[HttpPut("logout")]
+	public async Task<IActionResult> Logout()
+	{
+		AuthResponse authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity);
+		if (!authResponse.IsAuthorized) return Unauthorized();
+		try
+		{
+			await _userHelper.LogoutAsync();
+		}
+		catch (Exception e)
+		{
+			return StatusCode(500, e.Message);
+		}
+		return Ok("Logged out");
+	}
 }

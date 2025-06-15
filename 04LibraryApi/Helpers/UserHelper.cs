@@ -147,4 +147,9 @@ public class UserHelper : IUserHelper
     {
         return _userManager.FindByNameAsync(userName);
     }
+
+    public async Task LogoutAsync()
+    {
+        await _signInManager.SignOutAsync();
+    }
 }

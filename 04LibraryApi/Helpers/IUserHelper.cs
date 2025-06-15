@@ -41,4 +41,6 @@ public interface IUserHelper
    string GetUserRole(User user);
 
    Task<User> GetUserFromUserNameAsync(string userName);
+
+   Task LogoutAsync();
 }
