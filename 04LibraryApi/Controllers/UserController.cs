@@ -42,7 +42,7 @@ namespace _04LibraryApi.Controllers
         [HttpGet("user-info")]
         public async Task<IActionResult> GetUserInfo(string? username)
         {
-            AuthResponse authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity);
+            AuthResponse authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity, Request.Headers.Authorization.ToString());
             if (!authResponse.IsAuthorized)
             {
                 return Unauthorized();
@@ -66,7 +66,7 @@ namespace _04LibraryApi.Controllers
         [HttpGet("user-pic")]
         public async Task<IActionResult> GetUserPic()
         {
-            AuthResponse authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity);
+            AuthResponse authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity, Request.Headers.Authorization.ToString());
             if (!authResponse.IsAuthorized)
             {
                 return Unauthorized();
@@ -79,7 +79,7 @@ namespace _04LibraryApi.Controllers
         [HttpPut("user-pic")]
         public async Task<IActionResult> UploadPic(IFormFile file)
         {
-            AuthResponse authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity);
+            AuthResponse authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity, Request.Headers.Authorization.ToString());
             if (!authResponse.IsAuthorized)
             {
                 return Unauthorized();
@@ -107,7 +107,7 @@ namespace _04LibraryApi.Controllers
         [HttpPut("user-info")]
         public async Task<IActionResult> ChangeUserInfo([FromBody] UserInfo userInfo)
         {
-            var authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity);
+            var authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity, Request.Headers.Authorization.ToString());
             if (!authResponse.IsAuthorized)
             {
                 return Unauthorized();

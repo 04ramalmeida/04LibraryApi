@@ -31,7 +31,7 @@ public class LibraryController : ControllerBase
     [HttpGet("entries")]
     public async Task<IActionResult> GetLibraryEntries(int? entryId)
     {
-        AuthResponse authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity);
+        AuthResponse authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity, Request.Headers.Authorization.ToString());
         if (!authResponse.IsAuthorized)
         {
             return Unauthorized();
@@ -67,7 +67,7 @@ public class LibraryController : ControllerBase
     [HttpPost("entries")]
     public async Task<IActionResult> AddLibraryEntry(int bookId)
     {
-        AuthResponse authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity);
+        AuthResponse authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity, Request.Headers.Authorization.ToString());
         if (!authResponse.IsAuthorized)
         {
             return Unauthorized();
@@ -110,7 +110,7 @@ public class LibraryController : ControllerBase
     [HttpDelete("entries")]
     public async Task<IActionResult> RemoveLibraryEntry(int entryId)
     {
-        AuthResponse authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity);
+        AuthResponse authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity, Request.Headers.Authorization.ToString());
         var entry = await _libraryRepository.GetEntryById(entryId);
         
         if (entry == null)
@@ -140,7 +140,7 @@ public class LibraryController : ControllerBase
     [HttpPut("entries/status")]
     public async Task<IActionResult> SetEntryReadStatus(int entryId)
     {
-        AuthResponse authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity);
+        AuthResponse authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity, Request.Headers.Authorization.ToString());
         var entry = await _libraryRepository.GetEntryById(entryId);
         
         if (entry == null)
@@ -177,7 +177,7 @@ public class LibraryController : ControllerBase
             return BadRequest("The rating must be between 1 and 5.");
         }
         
-        AuthResponse authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity);
+        AuthResponse authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity, Request.Headers.Authorization.ToString());
         var entry = await _libraryRepository.GetEntryById(entryId);
 
         if (entry == null)
@@ -212,7 +212,7 @@ public class LibraryController : ControllerBase
             return BadRequest("The review exceeds the maximum length of 1024 characters.");
         }
         
-        AuthResponse authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity);
+        AuthResponse authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity, Request.Headers.Authorization.ToString());
         var entry = await _libraryRepository.GetEntryById(entryId);
 
         if (entry == null)

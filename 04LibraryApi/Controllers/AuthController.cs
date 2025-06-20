@@ -38,6 +38,7 @@ public class AuthController : ControllerBase
 		_libraryRepository = libraryRepository;
 	}
 
+
 	[HttpPost("login")]
 	public async Task<IActionResult> Login([FromBody]LoginInfo loginInfo) 
 	{
@@ -198,7 +199,7 @@ public class AuthController : ControllerBase
 	[HttpPut("change-password")]
 	public async Task<IActionResult> ChangePassword([FromBody] ChangePassword changePassword)
 	{
-		AuthResponse authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity);
+		AuthResponse authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity, HttpContext.Request.Headers["Authorization"]);
 		if (!authResponse.IsAuthorized)
 		{
 			return Unauthorized();
@@ -216,7 +217,7 @@ public class AuthController : ControllerBase
 	[HttpGet("verify-login")]
 	public async Task<IActionResult> VerifyLogin() 
 	{
-		AuthResponse authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity);
+		AuthResponse authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity, HttpContext.Request.Headers["Authorization"]);
 		if (!authResponse.IsAuthorized) return Unauthorized();
 		return Ok("");
 
@@ -226,11 +227,13 @@ public class AuthController : ControllerBase
 	[HttpPut("logout")]
 	public async Task<IActionResult> Logout()
 	{
-		AuthResponse authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity);
+		var token = HttpContext.Request.Headers["Authorization"];
+		AuthResponse authResponse = await _userHelper.VerifyLogin(HttpContext.User.Identity, token);
 		if (!authResponse.IsAuthorized) return Unauthorized();
 		try
 		{
 			await _userHelper.LogoutAsync();
+			await _userHelper.ExpireToken(token);
 		}
 		catch (Exception e)
 		{

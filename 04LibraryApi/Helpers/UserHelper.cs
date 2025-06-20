@@ -2,6 +2,7 @@
 using _04LibraryApi.Data;
 using _04LibraryApi.Data.Entities;
 using _04LibraryApi.Data.Models;
+using Azure.Core;
 using Microsoft.AspNetCore.Identity;
 
 namespace _04LibraryApi.Helpers;
@@ -69,10 +70,10 @@ public class UserHelper : IUserHelper
         return await _signInManager.PasswordSignInAsync(user, password, false, false);
     }
 
-    public async Task<AuthResponse> VerifyLogin(object auth)
+    public async Task<AuthResponse> VerifyLogin(object auth, string token)
     {
         AuthResponse result = new AuthResponse();
-        if (auth is ClaimsIdentity identity)
+        if (auth is ClaimsIdentity identity && !_context.ExpiredTokens.Any(et => et.Token == token))
         {
             var email = identity.FindFirst(ClaimTypes.Email).Value;
             var user = await _userManager.FindByEmailAsync(email);
@@ -151,5 +152,12 @@ public class UserHelper : IUserHelper
     public async Task LogoutAsync()
     {
         await _signInManager.SignOutAsync();
+    }
+
+    public async Task ExpireToken(string token)
+    {
+       await _context.ExpiredTokens.AddAsync(new ExpiredToken { Token =  token});
+       await _context.SaveChangesAsync();
+       
     }
 }

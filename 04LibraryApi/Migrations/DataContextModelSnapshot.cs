@@ -190,6 +190,23 @@ namespace _04LibraryApi.Migrations
                     b.ToTable("Books");
                 });
 
+            modelBuilder.Entity("_04LibraryApi.Data.Entities.ExpiredToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ExpiredTokens");
+                });
+
             modelBuilder.Entity("_04LibraryApi.Data.Entities.Library", b =>
                 {
                     b.Property<int>("Id")

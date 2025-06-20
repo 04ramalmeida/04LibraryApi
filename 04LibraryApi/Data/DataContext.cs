@@ -17,4 +17,6 @@ public class DataContext: IdentityDbContext<User>
     
     public DbSet<LibraryEntry> LibraryEntries { get; set; }
     
+    public DbSet<ExpiredToken> ExpiredTokens { get; set; }
+    
 }
